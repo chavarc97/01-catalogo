@@ -46,11 +46,19 @@ jobs:
     steps:
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v1.0.3
+      env:
+        AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
+        envs: AWS_KEY,AWS_SECRET,AWS_TOKEN
         script: |
+          export AWS_ACCESS_KEY_ID="$AWS_KEY"
+          export AWS_SECRET_ACCESS_KEY="$AWS_SECRET"
+          export AWS_SESSION_TOKEN="$AWS_TOKEN"
           aws ecr get-login-password --region us-east-1 | \
             docker login --username AWS --password-stdin 298572504484.dkr.ecr.us-east-1.amazonaws.com
           docker pull 298572504484.dkr.ecr.us-east-1.amazonaws.com/catalogo:latest
